@@ -1,11 +1,13 @@
-const CACHE_NAME = 'chabad-daily-v1';
+const CACHE_NAME = 'chabad-daily-v2';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/app.js',
   './manifest.json',
-  './icons/icon.svg'
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', e => {

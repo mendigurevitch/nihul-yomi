@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:\\\\nihul-yomi\\\\.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where python *)",
+      "Bash(where python3 *)",
+      "Bash(where node *)",
+      "Bash(python -c \"import http.server\")",
+      "PowerShell(Get-Command node,npm,npx -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\node\" -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Users\\\\user\\\\AppData\\\\Roaming\\\\npm\" -ErrorAction SilentlyContinue | Select-Object -First 5)"
+    ]
+  }
+}

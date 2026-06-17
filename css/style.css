@@ -221,11 +221,11 @@ html, body {
 }
 
 .task-title {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
   flex: 1;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .task-badges {
@@ -237,9 +237,9 @@ html, body {
 }
 
 .badge {
-  padding: 2px 9px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -254,9 +254,9 @@ html, body {
 
 .cat-badge {
   display: inline-block;
-  padding: 2px 10px;
+  padding: 3px 12px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: white;
   margin-bottom: 8px;
@@ -268,21 +268,21 @@ html, body {
 .cat-badge-chabad   { background: var(--cat-chabad); }
 
 .task-next-step {
-  font-size: 13px;
+  font-size: 15px;
   color: #374151;
-  padding: 8px 11px;
+  padding: 10px 13px;
   background: #F0F6FF;
   border-radius: 8px;
   border-right: 3px solid var(--primary);
   margin-bottom: 10px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .stuck-indicator {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--status-stuck);
   font-weight: 700;
   margin-bottom: 8px;
@@ -296,15 +296,15 @@ html, body {
 
 .task-btn {
   flex: 1;
-  padding: 9px 4px;
+  padding: 12px 4px;
   border: none;
   border-radius: 9px;
-  font-size: 12px;
+  font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
   font-family: inherit;
-  line-height: 1;
+  line-height: 1.1;
 }
 .task-btn:active { opacity: 0.8; transform: scale(0.97); }
 
@@ -314,7 +314,7 @@ html, body {
 
 .task-done-info {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--text-muted);
   display: flex;
   justify-content: space-between;

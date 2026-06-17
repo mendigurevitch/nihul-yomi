@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chabad-daily-v2';
+const CACHE_NAME = 'chabad-daily-v3';
 const ASSETS = [
   './',
   './index.html',

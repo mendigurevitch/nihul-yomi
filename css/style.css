@@ -22,13 +22,13 @@
 
   --nav-height: 64px;
   --header-height: 56px;
-  --radius: 14px;
-  --shadow: 0 2px 10px rgba(0,0,0,0.10);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,0.15);
+  --radius: 18px;
+  --shadow: 0 2px 12px rgba(16,42,82,0.06), 0 1px 3px rgba(16,42,82,0.04);
+  --shadow-lg: 0 8px 30px rgba(16,42,82,0.12);
 
   --text: #1A1A2E;
   --text-muted: #6B7280;
-  --bg: #F0F4F8;
+  --bg: #F4F6FB;
   --card: #FFFFFF;
 }
 
@@ -43,11 +43,14 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  font-family: 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+  font-family: 'Assistant', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   direction: rtl;
   font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.1px;
 }
 
 /* ===== APP SHELL ===== */
@@ -195,8 +198,9 @@ html, body {
 .card {
   background: var(--card);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   margin-bottom: 12px;
 }
 
@@ -377,6 +381,7 @@ html, body {
   border-radius: var(--radius);
   padding: 14px 12px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   text-align: center;
   cursor: pointer;
   transition: transform 0.1s;
@@ -402,7 +407,7 @@ html, body {
 
 .quick-action-btn {
   background: white;
-  border: none;
+  border: 1px solid rgba(16,42,82,0.05);
   border-radius: var(--radius);
   padding: 13px 6px;
   display: flex;
@@ -603,6 +608,7 @@ html, body {
   border-radius: var(--radius);
   padding: 11px 14px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   margin-bottom: 14px;
 }
 .month-btn {
@@ -655,8 +661,9 @@ html, body {
 .worker-card {
   background: white;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   margin-bottom: 12px;
 }
 .worker-header {
@@ -719,8 +726,9 @@ html, body {
 .donor-card {
   background: white;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -746,8 +754,9 @@ html, body {
 .reminder-item {
   background: white;
   border-radius: var(--radius);
-  padding: 12px 14px;
+  padding: 13px 15px;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(16,42,82,0.05);
   margin-bottom: 9px;
   display: flex;
   align-items: center;

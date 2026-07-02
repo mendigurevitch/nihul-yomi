@@ -97,6 +97,22 @@ function daysSince(iso) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
+// "כמה זמן עבר" מאז יצירת המשימה (לפי הפרש ימים קלנדרי)
+function relativeCreated(iso) {
+  if (!iso) return '';
+  const d = new Date(iso); d.setHours(0, 0, 0, 0);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const days = Math.round((now - d) / 86400000);
+  if (days <= 0) return 'היום';
+  if (days === 1) return 'אתמול';
+  if (days < 30) return `לפני ${days} ימים`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return 'לפני חודש';
+  if (months < 12) return `לפני ${months} חודשים`;
+  const years = Math.floor(days / 365);
+  return years === 1 ? 'לפני שנה' : `לפני ${years} שנים`;
+}
+
 function currentMonthKey() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -126,7 +142,8 @@ const ICON_PATHS = {
   check:       '<path d="M20 6 9 17l-5-5"/>',
   flame:       '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
   pencil:      '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
-  trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>'
+  trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
 };
 
 function ic(name, size) {
@@ -477,7 +494,7 @@ function taskCard(t) {
       ${t.nextStep ? `<div class="task-next-step">${esc(t.nextStep)}</div>` : ''}
       ${actions}
       <div class="task-meta-row">
-        <span class="task-date">📅 נוצר: ${fmtDate(t.createdAt)}</span>
+        <span class="task-date">${ic('clock', 13)} ${relativeCreated(t.createdAt)}</span>
         <span class="task-meta-tools">
           <button class="task-tool-btn" onclick="showEditTaskModal('${t.id}')">${ic('pencil', 15)} עריכה</button>
           <button class="task-tool-btn danger" onclick="confirmDeleteTask('${t.id}')">${ic('trash', 16)}</button>

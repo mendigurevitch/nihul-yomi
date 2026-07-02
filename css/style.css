@@ -377,6 +377,9 @@ html, body {
   font-size: 12.5px;
   color: var(--text-muted);
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .task-meta-tools { display: flex; gap: 7px; }
 .task-tool-btn {

@@ -321,10 +321,69 @@ html, body {
   margin-top: 8px;
   font-size: 13.5px;
   color: var(--text-muted);
+}
+
+/* ---- Clickable title (opens edit) ---- */
+.task-title { cursor: pointer; }
+
+/* ---- Aging highlight: old open tasks get louder ---- */
+.task-aging-warn {
+  background: #FFFBF3;
+  border-color: #FCD9A5;
+}
+.task-aging-alert {
+  background: #FFF5F3;
+  border-color: #FCA5A5;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.14), var(--shadow);
+  animation: agingPulse 2.4s ease-in-out infinite;
+}
+@keyframes agingPulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(239,68,68,0.12), var(--shadow); }
+  50%      { box-shadow: 0 0 0 4px rgba(239,68,68,0.22), var(--shadow); }
+}
+
+.aging-banner {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 11px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.aging-banner-warn  { background: #FEF3C7; color: #B45309; }
+.aging-banner-alert { background: #FEE2E2; color: #B91C1C; }
+
+/* ---- Meta row: creation date + edit / delete tools ---- */
+.task-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(99,102,241,0.10);
 }
+.task-date {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.task-meta-tools { display: flex; gap: 7px; }
+.task-tool-btn {
+  background: #F1F0FE;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.task-tool-btn:active { opacity: 0.8; transform: scale(0.96); }
+.task-tool-btn.danger { background: #FEE2E2; color: #DC2626; }
 
 /* ===== FILTER TABS ===== */
 .filter-tabs {

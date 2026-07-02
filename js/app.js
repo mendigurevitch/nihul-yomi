@@ -92,6 +92,11 @@ function timeSince(iso) {
   return 'פחות משעה';
 }
 
+function daysSince(iso) {
+  if (!iso) return 0;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
 function currentMonthKey() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -405,6 +410,20 @@ function taskCard(t) {
   const stuckLine = t.status === 'stuck' && t.stuckAt
     ? `<div class="stuck-indicator">⚠️ תקוע כבר ${timeSince(t.stuckAt)}</div>` : '';
 
+  // ---- Aging: old open tasks get progressively louder ----
+  let agingClass = '';
+  let agingBanner = '';
+  if (t.status !== 'done' && t.createdAt) {
+    const age = daysSince(t.createdAt);
+    if (age >= 14) {
+      agingClass = 'task-aging-alert';
+      agingBanner = `<div class="aging-banner aging-banner-alert">🔥 פתוחה כבר ${age} ימים — דחוף לטפל!</div>`;
+    } else if (age >= 7) {
+      agingClass = 'task-aging-warn';
+      agingBanner = `<div class="aging-banner aging-banner-warn">⏰ פתוחה כבר ${age} ימים</div>`;
+    }
+  }
+
   const actions = t.status !== 'done' ? `
     <div class="task-actions">
       <button class="task-btn btn-advance" onclick="handleAdvance('${t.id}')">📈 קידמתי</button>
@@ -412,25 +431,30 @@ function taskCard(t) {
       <button class="task-btn btn-done"    onclick="handleDone('${t.id}')">✅ הושלם</button>
     </div>
   ` : `
-    <div class="task-done-info">
-      <span>הושלם: ${fmtDateTime(t.completedAt || t.updatedAt)}</span>
-      <button onclick="deleteTask('${t.id}')" style="background:none;border:none;color:#EF5350;cursor:pointer;font-size:13px;font-weight:600">🗑 מחק</button>
-    </div>
+    <div class="task-done-info">הושלם: ${fmtDateTime(t.completedAt || t.updatedAt)}</div>
   `;
 
   return `
-    <div class="card task-card cat-${t.category} ${t.status === 'done' ? 'done' : ''}">
+    <div class="card task-card cat-${t.category} ${agingClass} ${t.status === 'done' ? 'done' : ''}">
       <div class="task-header">
-        <div class="task-title">${esc(t.title)}</div>
+        <div class="task-title" onclick="showEditTaskModal('${t.id}')">${esc(t.title)}</div>
         <div class="task-badges">
           <span class="badge badge-urgency-${t.urgency}">${URGENCY_HE[t.urgency]}</span>
           <span class="badge badge-status-${t.status}">${STATUS_HE[t.status]}</span>
         </div>
       </div>
       <span class="cat-badge cat-badge-${t.category}">${cat.label}</span>
+      ${agingBanner}
       ${stuckLine}
       ${t.nextStep ? `<div class="task-next-step">${esc(t.nextStep)}</div>` : ''}
       ${actions}
+      <div class="task-meta-row">
+        <span class="task-date">📅 נוצר: ${fmtDate(t.createdAt)}</span>
+        <span class="task-meta-tools">
+          <button class="task-tool-btn" onclick="showEditTaskModal('${t.id}')">✏️ עריכה</button>
+          <button class="task-tool-btn danger" onclick="confirmDeleteTask('${t.id}')">🗑</button>
+        </span>
+      </div>
     </div>
   `;
 }
@@ -504,10 +528,123 @@ function handleDone(id) {
   confirmComplete(id);
 }
 
-function deleteTask(id) {
-  if (!confirm('למחוק משימה זו לצמיתות?')) return;
+function confirmDeleteTask(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+  showModal(`
+    <div class="modal-title">🗑 מחיקת משימה</div>
+    <p style="font-size:16px;margin-bottom:6px">למחוק את המשימה?</p>
+    <div style="font-weight:700;color:var(--primary);font-size:16px;margin-bottom:16px">"${esc(t.title)}"</div>
+    <p class="text-muted" style="margin-bottom:18px">הפעולה אינה הפיכה. אם סיימת את המשימה — עדיף ללחוץ "✅ הושלם" כדי לשמור אותה בהיסטוריה.</p>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="doDeleteTask('${id}')">כן, מחק</button>
+      <button class="btn btn-secondary" onclick="hideModal()">לא, בטל</button>
+    </div>
+  `);
+}
+
+function doDeleteTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
   saveState();
+  hideModal();
+  toast('🗑 המשימה נמחקה');
+  renderApp();
+}
+
+// ===== EDIT TASK MODAL =====
+
+function showEditTaskModal(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+
+  const catOptions = Object.entries(CATEGORIES).map(([k, v]) => `
+    <div class="radio-option">
+      <input type="radio" name="etcat" id="etc-${k}" value="${k}" ${k === t.category ? 'checked' : ''}>
+      <label for="etc-${k}" style="border-color:${v.color}">${v.label}</label>
+    </div>`).join('');
+
+  const urgencies = [
+    ['urgent', '🔴 דחוף'], ['medium', '🟡 בינוני'], ['low', '🟢 נמוך']
+  ];
+  const urgOptions = urgencies.map(([k, l]) => `
+    <div class="radio-option">
+      <input type="radio" name="eturg" id="eu-${k}" value="${k}" ${k === t.urgency ? 'checked' : ''}>
+      <label for="eu-${k}">${l}</label>
+    </div>`).join('');
+
+  const statuses = [
+    ['new', 'חדש'], ['inProgress', 'בתהליך'], ['stuck', 'תקוע'], ['done', 'הושלם']
+  ];
+  const statusOptions = statuses.map(([k, l]) => `
+    <div class="radio-option">
+      <input type="radio" name="etstatus" id="es-${k}" value="${k}" ${k === t.status ? 'checked' : ''}>
+      <label for="es-${k}">${l}</label>
+    </div>`).join('');
+
+  showModal(`
+    <div class="modal-title">✏️ עריכת משימה</div>
+
+    <div class="form-group">
+      <label class="form-label">כותרת *</label>
+      <input type="text" id="et-title" class="form-input" value="${esc(t.title)}">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">קטגוריה</label>
+      <div class="radio-group">${catOptions}</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">דחיפות</label>
+      <div class="radio-group">${urgOptions}</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">סטטוס</label>
+      <div class="radio-group">${statusOptions}</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">צעד הבא</label>
+      <input type="text" id="et-next" class="form-input" value="${esc(t.nextStep || '')}" placeholder="מה הצעד הבא?">
+    </div>
+
+    <button class="btn btn-primary" onclick="saveTaskEdits('${id}')">💾 שמור שינויים</button>
+    <button class="btn btn-secondary mt-10" onclick="hideModal()">ביטול</button>
+  `);
+}
+
+function saveTaskEdits(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+  const title = document.getElementById('et-title')?.value.trim();
+  if (!title) { alert('נא למלא כותרת'); return; }
+
+  const newStatus = document.querySelector('input[name="etstatus"]:checked')?.value || t.status;
+  const now = new Date().toISOString();
+
+  // handle status transitions
+  if (newStatus === 'stuck' && t.status !== 'stuck') {
+    t.stuckAt = now;
+  } else if (newStatus !== 'stuck') {
+    t.stuckAt = null;
+  }
+  if (newStatus === 'done' && t.status !== 'done') {
+    t.completedAt = now;
+  } else if (newStatus !== 'done') {
+    t.completedAt = null;
+  }
+
+  t.title    = title;
+  t.category = document.querySelector('input[name="etcat"]:checked')?.value || t.category;
+  t.urgency  = document.querySelector('input[name="eturg"]:checked')?.value || t.urgency;
+  t.nextStep = document.getElementById('et-next')?.value.trim() || '';
+  t.status   = newStatus;
+  t.updatedAt = now;
+
+  saveState();
+  hideModal();
+  toast('💾 השינויים נשמרו!');
   renderApp();
 }
 

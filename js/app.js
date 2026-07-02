@@ -107,14 +107,42 @@ function dateToMonthKey(iso) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// ===== ICONS (inline Lucide SVG paths — work offline, no CDN) =====
+
+const ICON_PATHS = {
+  home:        '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  tasks:       '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+  wallet:      '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+  users:       '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  user:        '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  heart:       '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  note:        '<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>',
+  wrench:      '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  building:    '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
+  star:        '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  plus:        '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trendingUp:  '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  alert:       '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  check:       '<path d="M20 6 9 17l-5-5"/>',
+  flame:       '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  pencil:      '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
+  trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>'
+};
+
+function ic(name, size) {
+  size = size || 24;
+  const p = ICON_PATHS[name] || '';
+  return `<svg class="ic" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
 // ===== CONSTANTS =====
 
 const CATEGORIES = {
-  workers:  { label: 'עובדים',       color: '#43A047' },
-  finance:  { label: 'כספים',        color: '#1E88E5' },
-  building: { label: 'בניין',        color: '#FB8C00' },
-  personal: { label: 'אישי',         color: '#8E24AA' },
-  chabad:   { label: 'בית חב"ד',    color: '#E53935' }
+  workers:  { label: 'עובדים',       color: '#43A047', icon: 'users' },
+  finance:  { label: 'כספים',        color: '#1E88E5', icon: 'wallet' },
+  building: { label: 'בניין',        color: '#FB8C00', icon: 'building' },
+  personal: { label: 'אישי',         color: '#8E24AA', icon: 'user' },
+  chabad:   { label: 'בית חב"ד',    color: '#E53935', icon: 'star' }
 };
 
 const STATUS_HE = {
@@ -231,32 +259,32 @@ function renderApp() {
     <header class="app-header">
       <span class="header-title">${titles[state.currentView] || ''}</span>
       <div class="header-actions">
-        <button class="icon-btn" onclick="showRemindersModal()" title="תזכורות">📝</button>
-        <button class="icon-btn" onclick="showRepairsModal()" title="תיקונים">🔧</button>
+        <button class="icon-btn" onclick="showRemindersModal()" title="תזכורות">${ic('note', 20)}</button>
+        <button class="icon-btn" onclick="showRepairsModal()" title="תיקונים">${ic('wrench', 20)}</button>
       </div>
     </header>
 
     <main class="content-area">${content}</main>
 
-    ${fabAct ? `<button class="fab" onclick="${fabAct}" aria-label="הוסף">＋</button>` : ''}
+    ${fabAct ? `<button class="fab" onclick="${fabAct}" aria-label="הוסף">${ic('plus', 30)}</button>` : ''}
 
     <nav class="bottom-nav">
-      ${navItem('home',    '🏠', 'בית')}
-      ${navItem('tasks',   '✅', 'משימות', urgentOpen)}
-      ${navItem('finance', '💰', 'כספים')}
-      ${navItem('workers', '👷', 'עובדים')}
-      ${navItem('donors',  '🤝', 'תורמים')}
+      ${navItem('home',    'home',   'בית')}
+      ${navItem('tasks',   'tasks',  'משימות', urgentOpen)}
+      ${navItem('finance', 'wallet', 'כספים')}
+      ${navItem('workers', 'users',  'עובדים')}
+      ${navItem('donors',  'heart',  'תורמים')}
     </nav>
   `;
 }
 
-function navItem(view, icon, label, badge = 0) {
+function navItem(view, iconName, label, badge = 0) {
   const active = state.currentView === view ? 'active' : '';
   const badgeHtml = badge > 0 ? `<span class="nav-badge">${badge}</span>` : '';
   return `
     <button class="nav-item ${active}" onclick="nav('${view}')">
       ${badgeHtml}
-      <span class="nav-icon">${icon}</span>
+      <span class="nav-icon">${ic(iconName, 24)}</span>
       <span class="nav-label">${label}</span>
     </button>`;
 }
@@ -308,27 +336,27 @@ function renderHome() {
     <div class="section-title">⚡ פעולות מהירות</div>
     <div class="quick-actions">
       <button class="quick-action-btn" onclick="showAddTaskModal()">
-        <span class="quick-action-icon">➕</span>
+        <span class="quick-action-icon" style="color:#3B82F6;background:#EAF2FE">${ic('tasks', 26)}</span>
         <span class="quick-action-label">משימה</span>
       </button>
       <button class="quick-action-btn" onclick="showAddTransactionModal()">
-        <span class="quick-action-icon">💸</span>
+        <span class="quick-action-icon" style="color:#10B981;background:#E7FAF2">${ic('wallet', 26)}</span>
         <span class="quick-action-label">תנועה כספית</span>
       </button>
       <button class="quick-action-btn" onclick="showRemindersModal()">
-        <span class="quick-action-icon">📝</span>
+        <span class="quick-action-icon" style="color:#A855F7;background:#F6EBFE">${ic('note', 26)}</span>
         <span class="quick-action-label">תזכורת</span>
       </button>
       <button class="quick-action-btn" onclick="showRepairsModal()">
-        <span class="quick-action-icon">🔧</span>
+        <span class="quick-action-icon" style="color:#F59E0B;background:#FEF5E6">${ic('wrench', 26)}</span>
         <span class="quick-action-label">תיקון</span>
       </button>
       <button class="quick-action-btn" onclick="nav('donors')">
-        <span class="quick-action-icon">🤝</span>
+        <span class="quick-action-icon" style="color:#EC4899;background:#FDECF5">${ic('heart', 26)}</span>
         <span class="quick-action-label">תורמים</span>
       </button>
       <button class="quick-action-btn" onclick="nav('workers')">
-        <span class="quick-action-icon">👷</span>
+        <span class="quick-action-icon" style="color:#F59E0B;background:#FEF5E6">${ic('users', 26)}</span>
         <span class="quick-action-label">עובדים</span>
       </button>
     </div>
@@ -408,7 +436,7 @@ function renderTasks() {
 function taskCard(t) {
   const cat = CATEGORIES[t.category] || CATEGORIES.chabad;
   const stuckLine = t.status === 'stuck' && t.stuckAt
-    ? `<div class="stuck-indicator">⚠️ תקוע כבר ${timeSince(t.stuckAt)}</div>` : '';
+    ? `<div class="stuck-indicator">${ic('alert', 15)} תקוע כבר ${timeSince(t.stuckAt)}</div>` : '';
 
   // ---- Aging: old open tasks get progressively louder ----
   let agingClass = '';
@@ -426,9 +454,9 @@ function taskCard(t) {
 
   const actions = t.status !== 'done' ? `
     <div class="task-actions">
-      <button class="task-btn btn-advance" onclick="handleAdvance('${t.id}')">📈 קידמתי</button>
-      <button class="task-btn btn-stuck"   onclick="handleStuck('${t.id}')">⚠️ תקוע</button>
-      <button class="task-btn btn-done"    onclick="handleDone('${t.id}')">✅ הושלם</button>
+      <button class="task-btn btn-advance" onclick="handleAdvance('${t.id}')">${ic('trendingUp', 16)} קידמתי</button>
+      <button class="task-btn btn-stuck"   onclick="handleStuck('${t.id}')">${ic('alert', 16)} תקוע</button>
+      <button class="task-btn btn-done"    onclick="handleDone('${t.id}')">${ic('check', 16)} הושלם</button>
     </div>
   ` : `
     <div class="task-done-info">הושלם: ${fmtDateTime(t.completedAt || t.updatedAt)}</div>
@@ -443,7 +471,7 @@ function taskCard(t) {
           <span class="badge badge-status-${t.status}">${STATUS_HE[t.status]}</span>
         </div>
       </div>
-      <span class="cat-badge cat-badge-${t.category}">${cat.label}</span>
+      <span class="cat-badge cat-badge-${t.category}">${ic(cat.icon, 14)} ${cat.label}</span>
       ${agingBanner}
       ${stuckLine}
       ${t.nextStep ? `<div class="task-next-step">${esc(t.nextStep)}</div>` : ''}
@@ -451,8 +479,8 @@ function taskCard(t) {
       <div class="task-meta-row">
         <span class="task-date">📅 נוצר: ${fmtDate(t.createdAt)}</span>
         <span class="task-meta-tools">
-          <button class="task-tool-btn" onclick="showEditTaskModal('${t.id}')">✏️ עריכה</button>
-          <button class="task-tool-btn danger" onclick="confirmDeleteTask('${t.id}')">🗑</button>
+          <button class="task-tool-btn" onclick="showEditTaskModal('${t.id}')">${ic('pencil', 15)} עריכה</button>
+          <button class="task-tool-btn danger" onclick="confirmDeleteTask('${t.id}')">${ic('trash', 16)}</button>
         </span>
       </div>
     </div>

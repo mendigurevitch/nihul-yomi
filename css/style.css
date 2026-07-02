@@ -44,7 +44,7 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  font-family: 'Assistant', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+  font-family: 'Heebo', 'Assistant', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   direction: rtl;
@@ -149,8 +149,11 @@ html, body {
 }
 .nav-item:active { background: rgba(99,102,241,0.07); }
 
-.nav-icon { font-size: 22px; line-height: 1; }
+.nav-icon { display: flex; align-items: center; justify-content: center; line-height: 1; }
 .nav-label { font-size: 11px; font-weight: 600; }
+
+/* Base inline-SVG icon */
+.ic { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
 .nav-badge {
   position: absolute;
@@ -258,8 +261,10 @@ html, body {
 .badge-status-done      { background: #E8F5E9; color: var(--status-done); }
 
 .cat-badge {
-  display: inline-block;
-  padding: 3px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 700;
@@ -310,6 +315,10 @@ html, body {
   transition: opacity 0.15s, transform 0.1s;
   font-family: inherit;
   line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 .task-btn:active { opacity: 0.8; transform: scale(0.97); }
 
@@ -381,6 +390,9 @@ html, body {
   cursor: pointer;
   font-family: inherit;
   transition: opacity 0.15s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .task-tool-btn:active { opacity: 0.8; transform: scale(0.96); }
 .task-tool-btn.danger { background: #FEE2E2; color: #DC2626; }
@@ -480,7 +492,14 @@ html, body {
   transition: transform 0.12s, box-shadow 0.12s;
 }
 .quick-action-btn:active { transform: scale(0.96); box-shadow: none; }
-.quick-action-icon  { font-size: 28px; }
+.quick-action-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .quick-action-label { font-size: 12.5px; font-weight: 700; color: var(--text); }
 
 /* ===== SECTION TITLES ===== */

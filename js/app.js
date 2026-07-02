@@ -143,7 +143,8 @@ const ICON_PATHS = {
   flame:       '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
   pencil:      '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
   trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
-  clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+  clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  whatsapp:     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'
 };
 
 function ic(name, size) {
@@ -1262,38 +1263,34 @@ function deleteReminder(id) {
 // ===== REPAIRS =====
 
 function showRepairsModal() {
-  const statusMap = { open: 'פתוח', inprogress: 'בטיפול', done: 'הושלם' };
   const list = state.repairs.length > 0
-    ? state.repairs.map(r => `
-        <div class="card" style="margin-bottom:9px;padding:12px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div style="flex:1">
-              <div style="font-size:14px;font-weight:600;line-height:1.4">${esc(r.description)}</div>
-              <div class="text-muted" style="margin-top:3px">${fmtDate(r.createdAt)}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-              <select class="repair-status-badge s-${r.status}"
-                      onchange="updateRepairStatus('${r.id}', this.value)">
-                <option value="open"       ${r.status === 'open'       ? 'selected' : ''}>פתוח</option>
-                <option value="inprogress" ${r.status === 'inprogress' ? 'selected' : ''}>בטיפול</option>
-                <option value="done"       ${r.status === 'done'       ? 'selected' : ''}>הושלם</option>
-              </select>
-              <button class="delete-btn" onclick="deleteRepair('${r.id}')">✕</button>
-            </div>
-          </div>
-        </div>`).join('')
+    ? `<div class="card" style="padding:2px 0">${state.repairs.map(r => `
+        <div class="repair-row">
+          <span class="repair-row-text">${esc(r.description)}</span>
+          <span class="repair-row-tools">
+            <button class="repair-icon-btn" onclick="editRepair('${r.id}')">${ic('pencil', 15)}</button>
+            <button class="repair-icon-btn danger" onclick="confirmDeleteRepair('${r.id}')">${ic('trash', 15)}</button>
+          </span>
+        </div>`).join('')}</div>`
     : '<div style="text-align:center;color:#9CA3AF;padding:20px 0">אין תיקונים</div>';
 
   showModal(`
     <div class="modal-title">🔧 תיקונים</div>
+
+    <button class="btn btn-success" style="margin-bottom:14px" onclick="sendRepairsWhatsApp()">
+      ${ic('whatsapp', 20)} שלח לאמיר בוואטסאפ
+    </button>
+
     <div id="rep-list">${list}</div>
-    <div class="form-group" style="margin-top:14px">
-      <textarea id="rep-desc" class="form-textarea" placeholder="תאר את התקלה..." rows="2"
-                style="font-size:15px"></textarea>
+
+    <div class="inline-add" style="margin-top:14px">
+      <input type="text" id="rep-desc" class="form-input" placeholder="תאר את התקלה..."
+             onkeydown="if(event.key==='Enter') addRepair()">
+      <button class="inline-add-btn" onclick="addRepair()">+</button>
     </div>
-    <button class="btn btn-primary" onclick="addRepair()">+ הוסף תיקון</button>
     <button class="btn btn-secondary mt-10" onclick="hideModal()">סגור</button>
   `);
+  setTimeout(() => document.getElementById('rep-desc')?.focus(), 80);
 }
 
 function addRepair() {
@@ -1304,15 +1301,57 @@ function addRepair() {
   showRepairsModal();
 }
 
-function updateRepairStatus(id, status) {
+function editRepair(id) {
   const r = state.repairs.find(x => x.id === id);
-  if (r) { r.status = status; saveState(); showRepairsModal(); }
+  if (!r) return;
+  showModal(`
+    <div class="modal-title">✏️ עריכת תיקון</div>
+    <div class="form-group">
+      <label class="form-label">תיאור התקלה</label>
+      <textarea id="rep-edit" class="form-textarea" rows="3">${esc(r.description)}</textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveRepairEdit('${id}')">💾 שמור</button>
+    <button class="btn btn-secondary mt-10" onclick="showRepairsModal()">ביטול</button>
+  `);
+  setTimeout(() => document.getElementById('rep-edit')?.focus(), 80);
 }
 
-function deleteRepair(id) {
+function saveRepairEdit(id) {
+  const v = document.getElementById('rep-edit')?.value.trim();
+  if (!v) { alert('נא למלא תיאור'); return; }
+  const r = state.repairs.find(x => x.id === id);
+  if (r) r.description = v;
+  saveState();
+  showRepairsModal();
+  toast('💾 התיקון עודכן');
+}
+
+function confirmDeleteRepair(id) {
+  const r = state.repairs.find(x => x.id === id);
+  if (!r) return;
+  showModal(`
+    <div class="modal-title">🗑 מחיקת תיקון</div>
+    <p style="font-size:16px;margin-bottom:6px">למחוק?</p>
+    <div style="font-weight:700;color:var(--primary);margin-bottom:18px">"${esc(r.description)}"</div>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="doDeleteRepair('${id}')">כן, מחק</button>
+      <button class="btn btn-secondary" onclick="showRepairsModal()">לא</button>
+    </div>
+  `);
+}
+
+function doDeleteRepair(id) {
   state.repairs = state.repairs.filter(r => r.id !== id);
   saveState();
   showRepairsModal();
+  toast('🗑 התיקון נמחק');
+}
+
+function sendRepairsWhatsApp() {
+  if (state.repairs.length === 0) { alert('אין תיקונים לשליחה'); return; }
+  let msg = 'שלום אמיר, רשימת תיקונים:\n';
+  state.repairs.forEach((r, i) => { msg += `${i + 1}. ${r.description}\n`; });
+  window.open('https://wa.me/972546527708?text=' + encodeURIComponent(msg), '_blank');
 }
 
 // ===== SERVICE WORKER =====

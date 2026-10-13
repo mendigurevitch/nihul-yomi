@@ -1085,3 +1085,91 @@ html, body {
 .repair-icon-btn:active { background: #F1F0FE; }
 .repair-icon-btn.danger { color: #DC2626; }
 .repair-icon-btn.danger:active { background: #FEE2E2; }
+
+/* ===== PRINT TASKS ===== */
+
+.print-tasks-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  border: 1.5px solid #E0E7FF;
+  border-radius: 14px;
+  background: white;
+  color: var(--primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.print-tasks-btn:active { background: #F1F0FE; }
+
+/* Print sheet exists only for printing */
+#print-area { display: none; }
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  body > *:not(#print-area) { display: none !important; }
+
+  #print-area {
+    display: block;
+    direction: rtl;
+    color: #000;
+    font-family: 'Heebo', Arial, sans-serif;
+  }
+  #print-area * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .print-header {
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .print-title { font-size: 20px; font-weight: 800; }
+  .print-date  { font-size: 12px; }
+
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .print-card {
+    border: 1px solid #666;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.35;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-card-head {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    margin-bottom: 3px;
+  }
+  .print-check {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin-top: 1px;
+    border: 1.2px solid #000;
+    border-radius: 2px;
+  }
+  .print-card-title { font-size: 12.5px; font-weight: 700; }
+  .print-card-meta  { font-size: 10px; }
+  .print-card-next  { font-size: 10.5px; margin-top: 2px; }
+}

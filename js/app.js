@@ -144,7 +144,8 @@ const ICON_PATHS = {
   pencil:      '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
   trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
   clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-  whatsapp:     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'
+  whatsapp:     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  printer:     '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>'
 };
 
 function ic(name, size) {
@@ -435,6 +436,7 @@ function renderTasks() {
   };
 
   return `
+    <button class="print-tasks-btn" onclick="printTasks()">${ic('printer', 17)} הדפס משימות</button>
     <div class="filter-tabs">
       ${filters.map(f2 => `
         <button class="filter-tab ${state.taskFilter === f2.k ? 'active' : ''}"
@@ -504,6 +506,50 @@ function taskCard(t) {
     </div>
   `;
 }
+
+// ===== PRINT TASKS (black & white sheet, only used for printing) =====
+
+function buildPrintSheet() {
+  const list = rankTasks(state.tasks);
+  if (list.length === 0) return false;
+
+  const today = new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const cards = list.map(t => {
+    const cat = (CATEGORIES[t.category] || CATEGORIES.chabad).label;
+    return `
+      <div class="print-card">
+        <div class="print-card-head">
+          <span class="print-check"></span>
+          <span class="print-card-title">${esc(t.title)}</span>
+        </div>
+        <div class="print-card-meta">קטגוריה: ${cat} | דחיפות: ${URGENCY_HE[t.urgency] || ''}</div>
+        ${t.nextStep ? `<div class="print-card-next">צעד הבא: ${esc(t.nextStep)}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  let area = document.getElementById('print-area');
+  if (!area) {
+    area = document.createElement('div');
+    area.id = 'print-area';
+    document.body.appendChild(area);
+  }
+  area.innerHTML = `
+    <div class="print-header">
+      <div class="print-title">רשימת משימות</div>
+      <div class="print-date">${today} · ${list.length} משימות</div>
+    </div>
+    <div class="print-grid">${cards}</div>
+  `;
+  return true;
+}
+
+function printTasks() {
+  if (!buildPrintSheet()) { alert('אין משימות פתוחות להדפסה'); return; }
+  window.print();
+}
+
+// Ctrl+P also prints the task sheet
+window.addEventListener('beforeprint', buildPrintSheet);
 
 function setTaskFilter(f) {
   state.taskFilter = f;

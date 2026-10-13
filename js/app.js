@@ -1390,8 +1390,17 @@ async function copyRepairsList() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
+  // When a new version takes over, reload once so the latest code runs
+  if (navigator.serviceWorker.controller) {
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
+  }
 }
 
 // ===== INIT =====

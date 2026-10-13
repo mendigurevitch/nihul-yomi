@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chabad-daily-v11';
+const CACHE_NAME = 'chabad-daily-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -11,8 +11,11 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
+  // cache: 'reload' bypasses the browser HTTP cache so we store fresh files
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache =>
+      cache.addAll(ASSETS.map(url => new Request(url, { cache: 'reload' })))
+    )
   );
   self.skipWaiting();
 });
@@ -26,8 +29,19 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Network first (always latest version when online), cache as offline fallback
 self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(req, { cache: 'no-cache' })
+      .then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
 });

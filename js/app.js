@@ -1280,6 +1280,9 @@ function showRepairsModal() {
     <button class="btn btn-success" style="margin-bottom:14px" onclick="sendRepairsWhatsApp()">
       ${ic('whatsapp', 20)} שלח לאמיר בוואטסאפ
     </button>
+    <button class="btn btn-secondary" style="margin-bottom:14px" onclick="showRepairsList()">
+      📋 רכז רשימה
+    </button>
 
     <div id="rep-list">${list}</div>
 
@@ -1347,11 +1350,40 @@ function doDeleteRepair(id) {
   toast('🗑 התיקון נמחק');
 }
 
-function sendRepairsWhatsApp() {
-  if (state.repairs.length === 0) { alert('אין תיקונים לשליחה'); return; }
+// Same text is used for WhatsApp and for the copyable list
+function buildRepairsMessage() {
   let msg = 'שלום אמיר, רשימת תיקונים:\n';
   state.repairs.forEach((r, i) => { msg += `${i + 1}. ${r.description}\n`; });
+  return msg;
+}
+
+function sendRepairsWhatsApp() {
+  if (state.repairs.length === 0) { alert('אין תיקונים לשליחה'); return; }
+  const msg = buildRepairsMessage();
   window.open('https://wa.me/972546527708?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function showRepairsList() {
+  if (state.repairs.length === 0) { alert('אין תיקונים'); return; }
+  showModal(`
+    <div class="modal-title">📋 רשימת תיקונים</div>
+    <textarea id="rep-all" class="form-textarea" rows="${Math.min(state.repairs.length + 2, 14)}" readonly>${esc(buildRepairsMessage())}</textarea>
+    <button class="btn btn-primary mt-10" onclick="copyRepairsList()">📋 העתק</button>
+    <button class="btn btn-secondary mt-10" onclick="showRepairsModal()">חזור</button>
+  `);
+}
+
+async function copyRepairsList() {
+  const text = buildRepairsMessage();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.getElementById('rep-all');
+    if (!ta) return;
+    ta.select();
+    document.execCommand('copy');
+  }
+  toast('✅ הרשימה הועתקה');
 }
 
 // ===== SERVICE WORKER =====

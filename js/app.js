@@ -420,19 +420,22 @@ function renderTasks() {
     { k: 'done',     l: '✅ הושלם' }
   ];
 
+  // מיון יציב לפי תאריך יצירה (לא משתנה עם הסטטוס) — כך משימה
+  // נשארת במקומה גם כשמסמנים אותה הושלם / תקוע / קידמתי.
   let list;
   const f = state.taskFilter;
   if (f === 'done') {
-    list = [...state.tasks].filter(t => t.status === 'done').reverse();
+    list = state.tasks.filter(t => t.status === 'done');
   } else if (f === 'stuck') {
-    list = rankTasks(state.tasks).filter(t => t.status === 'stuck');
+    list = state.tasks.filter(t => t.status === 'stuck');
   } else if (f === 'urgent') {
-    list = rankTasks(state.tasks).filter(t => t.urgency === 'urgent');
+    list = state.tasks.filter(t => t.urgency === 'urgent');
   } else if (f === 'all') {
-    list = rankTasks(state.tasks);
+    list = state.tasks.slice();
   } else {
-    list = rankTasks(state.tasks).filter(t => t.category === f);
+    list = state.tasks.filter(t => t.category === f);
   }
+  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const emptyMsgs = {
     all: 'אין משימות פתוחות 🎉',

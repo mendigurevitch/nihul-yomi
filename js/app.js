@@ -145,7 +145,9 @@ const ICON_PATHS = {
   trash:       '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
   clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   whatsapp:     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
-  printer:     '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>'
+  printer:     '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+  zap:         '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  calendar:    '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>'
 };
 
 function ic(name, size) {
@@ -171,6 +173,10 @@ const STATUS_HE = {
 const URGENCY_HE = {
   urgent: 'דחוף', medium: 'בינוני', low: 'נמוך'
 };
+
+// סוג משימה: "כאן ועכשיו" (מיידי) / "מתמשכת" (על פני ימים/שבועות)
+const KIND_HE = { now: 'כאן ועכשיו', ongoing: 'מתמשכת' };
+function taskKind(t) { return t.kind === 'ongoing' ? 'ongoing' : 'now'; }
 
 const FIN_CATS = {
   tzedaka:     'קופות צדקה',
@@ -435,6 +441,29 @@ function renderTasks() {
     urgent: 'אין משימות דחופות 🎉'
   };
 
+  // חלוקה לשני אזורים: "כאן ועכשיו" ו"מתמשכות"
+  const nowList     = list.filter(t => taskKind(t) === 'now');
+  const ongoingList = list.filter(t => taskKind(t) === 'ongoing');
+
+  const section = (title, iconName, arr) => arr.length === 0 ? '' : `
+    <div class="task-section-title">
+      ${ic(iconName, 18)} <span>${title}</span>
+      <span class="task-section-count">${arr.length}</span>
+    </div>
+    ${arr.map(t => taskCard(t)).join('')}`;
+
+  let body;
+  if (list.length === 0) {
+    body = `
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <div class="empty-text">${emptyMsgs[f] || 'אין משימות'}</div>
+        <div class="empty-sub">לחץ ＋ כדי להוסיף</div>
+      </div>`;
+  } else {
+    body = section('כאן ועכשיו', 'zap', nowList) + section('מתמשכות', 'calendar', ongoingList);
+  }
+
   return `
     <button class="print-tasks-btn" onclick="printTasks()">${ic('printer', 17)} הדפס משימות</button>
     <div class="filter-tabs">
@@ -443,13 +472,7 @@ function renderTasks() {
                 onclick="setTaskFilter('${f2.k}')">${f2.l}</button>
       `).join('')}
     </div>
-    ${list.length === 0 ? `
-      <div class="empty-state">
-        <div class="empty-icon">✅</div>
-        <div class="empty-text">${emptyMsgs[f] || 'אין משימות'}</div>
-        <div class="empty-sub">לחץ ＋ כדי להוסיף</div>
-      </div>
-    ` : list.map(t => taskCard(t)).join('')}
+    ${body}
   `;
 }
 
@@ -514,7 +537,8 @@ function buildPrintSheet() {
   if (list.length === 0) return false;
 
   const today = new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const cards = list.map(t => {
+
+  const printCard = t => {
     const cat = (CATEGORIES[t.category] || CATEGORIES.chabad).label;
     return `
       <div class="print-card">
@@ -525,7 +549,16 @@ function buildPrintSheet() {
         <div class="print-card-meta">קטגוריה: ${cat} | דחיפות: ${URGENCY_HE[t.urgency] || ''}</div>
         ${t.nextStep ? `<div class="print-card-next">צעד הבא: ${esc(t.nextStep)}</div>` : ''}
       </div>`;
-  }).join('');
+  };
+
+  const nowList     = list.filter(t => taskKind(t) === 'now');
+  const ongoingList = list.filter(t => taskKind(t) === 'ongoing');
+
+  const group = (title, arr) => arr.length === 0 ? '' : `
+    <div class="print-section-title">${title} (${arr.length})</div>
+    <div class="print-grid">${arr.map(printCard).join('')}</div>`;
+
+  const divider = (nowList.length && ongoingList.length) ? '<div class="print-divider"></div>' : '';
 
   let area = document.getElementById('print-area');
   if (!area) {
@@ -538,7 +571,9 @@ function buildPrintSheet() {
       <div class="print-title">רשימת משימות</div>
       <div class="print-date">${today} · ${list.length} משימות</div>
     </div>
-    <div class="print-grid">${cards}</div>
+    ${group('כאן ועכשיו', nowList)}
+    ${divider}
+    ${group('מתמשכות', ongoingList)}
   `;
   return true;
 }
@@ -673,12 +708,28 @@ function showEditTaskModal(id) {
       <label for="es-${k}">${l}</label>
     </div>`).join('');
 
+  const tk = taskKind(t);
+  const kindOptions = `
+    <div class="radio-option">
+      <input type="radio" name="etkind" id="ek-now" value="now" ${tk === 'now' ? 'checked' : ''}>
+      <label for="ek-now">⚡ כאן ועכשיו</label>
+    </div>
+    <div class="radio-option">
+      <input type="radio" name="etkind" id="ek-ongoing" value="ongoing" ${tk === 'ongoing' ? 'checked' : ''}>
+      <label for="ek-ongoing">📆 מתמשכת</label>
+    </div>`;
+
   showModal(`
     <div class="modal-title">✏️ עריכת משימה</div>
 
     <div class="form-group">
       <label class="form-label">כותרת *</label>
       <input type="text" id="et-title" class="form-input" value="${esc(t.title)}">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">סוג המשימה</label>
+      <div class="radio-group">${kindOptions}</div>
     </div>
 
     <div class="form-group">
@@ -730,6 +781,7 @@ function saveTaskEdits(id) {
   t.title    = title;
   t.category = document.querySelector('input[name="etcat"]:checked')?.value || t.category;
   t.urgency  = document.querySelector('input[name="eturg"]:checked')?.value || t.urgency;
+  t.kind     = document.querySelector('input[name="etkind"]:checked')?.value || taskKind(t);
   t.nextStep = document.getElementById('et-next')?.value.trim() || '';
   t.status   = newStatus;
   t.updatedAt = now;
@@ -756,6 +808,20 @@ function showAddTaskModal(prefillCat) {
     <div class="form-group">
       <label class="form-label">כותרת *</label>
       <input type="text" id="t-title" class="form-input" placeholder="מה צריך לעשות?">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">סוג המשימה</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="tkind" id="tk-now" value="now" checked>
+          <label for="tk-now">⚡ כאן ועכשיו</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="tkind" id="tk-ongoing" value="ongoing">
+          <label for="tk-ongoing">📆 מתמשכת</label>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -797,9 +863,10 @@ function addTask() {
   if (!title) { alert('נא למלא כותרת'); return; }
   const cat     = document.querySelector('input[name="tcat"]:checked')?.value || 'chabad';
   const urgency = document.querySelector('input[name="turg"]:checked')?.value || 'medium';
+  const kind    = document.querySelector('input[name="tkind"]:checked')?.value || 'now';
   const nextStep = document.getElementById('t-next')?.value.trim() || '';
   state.tasks.push({
-    id: uid(), title, category: cat, urgency,
+    id: uid(), title, category: cat, urgency, kind,
     status: 'new', nextStep,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

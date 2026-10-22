@@ -517,6 +517,35 @@ html, body {
   gap: 8px;
 }
 
+/* כותרת אזור בתצוגת המשימות (כאן ועכשיו / מתמשכות) */
+.task-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 4px 2px 10px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid rgba(99,102,241,0.15);
+}
+/* מרווח ברור בין האזור הראשון לשני */
+.card + .task-section-title { margin-top: 26px; }
+.task-section-count {
+  margin-right: auto;
+  background: #F1F0FE;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 24px;
+  height: 22px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
 /* ===== MODALS ===== */
 .modal-overlay {
   position: fixed;
@@ -1172,4 +1201,19 @@ html, body {
   .print-card-title { font-size: 12.5px; font-weight: 700; }
   .print-card-meta  { font-size: 10px; }
   .print-card-next  { font-size: 10.5px; margin-top: 2px; }
+
+  .print-section-title {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 10px 0 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #000;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .print-divider {
+    height: 0;
+    border-top: 1.5px dashed #000;
+    margin: 14px 0;
+  }
 }

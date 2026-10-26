@@ -548,14 +548,23 @@ function buildPrintSheet() {
 
   const printCard = t => {
     const cat = (CATEGORIES[t.category] || CATEGORIES.chabad).label;
+    const d = daysSince(t.createdAt);
+    let daysInner;
+    if (d <= 0)      daysInner = '<span class="print-card-word">היום</span>';
+    else if (d === 1) daysInner = '<span class="print-card-word">יום</span>';
+    else if (d === 2) daysInner = '<span class="print-card-word">יומיים</span>';
+    else              daysInner = `<span class="print-card-num">${d}</span><span class="print-card-unit">ימים</span>`;
     return `
       <div class="print-card">
-        <div class="print-card-head">
-          <span class="print-check"></span>
-          <span class="print-card-title">${esc(t.title)}</span>
+        <div class="print-card-days">${daysInner}</div>
+        <div class="print-card-body">
+          <div class="print-card-head">
+            <span class="print-check"></span>
+            <span class="print-card-title">${esc(t.title)}</span>
+          </div>
+          <div class="print-card-meta">קטגוריה: ${cat} | דחיפות: ${URGENCY_HE[t.urgency] || ''}</div>
+          ${t.nextStep ? `<div class="print-card-next">צעד הבא: ${esc(t.nextStep)}</div>` : ''}
         </div>
-        <div class="print-card-meta">קטגוריה: ${cat} | דחיפות: ${URGENCY_HE[t.urgency] || ''}</div>
-        ${t.nextStep ? `<div class="print-card-next">צעד הבא: ${esc(t.nextStep)}</div>` : ''}
       </div>`;
   };
 

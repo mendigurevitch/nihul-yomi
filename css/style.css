@@ -330,6 +330,11 @@ html, body {
   margin-top: 8px;
   font-size: 13.5px;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* ---- Clickable title (opens edit) ---- */

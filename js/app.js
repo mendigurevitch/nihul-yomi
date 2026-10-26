@@ -147,7 +147,8 @@ const ICON_PATHS = {
   whatsapp:     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
   printer:     '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
   zap:         '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-  calendar:    '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>'
+  calendar:    '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>',
+  undo:        '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/>'
 };
 
 function ic(name, size) {
@@ -417,11 +418,12 @@ function renderTasks() {
     { k: 'building', l: 'בניין' },
     { k: 'personal', l: 'אישי' },
     { k: 'chabad',   l: 'חב"ד' },
-    { k: 'done',     l: '✅ הושלם' }
+    { k: 'done',     l: '✅ הושלמו' }
   ];
 
   // מיון יציב לפי תאריך יצירה (לא משתנה עם הסטטוס) — כך משימה
   // נשארת במקומה גם כשמסמנים אותה הושלם / תקוע / קידמתי.
+  // הרשימות הרגילות מציגות רק משימות פתוחות; ההושלמו בלשונית נפרדת.
   let list;
   const f = state.taskFilter;
   if (f === 'done') {
@@ -429,11 +431,11 @@ function renderTasks() {
   } else if (f === 'stuck') {
     list = state.tasks.filter(t => t.status === 'stuck');
   } else if (f === 'urgent') {
-    list = state.tasks.filter(t => t.urgency === 'urgent');
+    list = state.tasks.filter(t => t.urgency === 'urgent' && t.status !== 'done');
   } else if (f === 'all') {
-    list = state.tasks.slice();
+    list = state.tasks.filter(t => t.status !== 'done');
   } else {
-    list = state.tasks.filter(t => t.category === f);
+    list = state.tasks.filter(t => t.category === f && t.status !== 'done');
   }
   list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -505,7 +507,10 @@ function taskCard(t) {
       <button class="task-btn btn-done"    onclick="handleDone('${t.id}')">${ic('check', 16)} הושלם</button>
     </div>
   ` : `
-    <div class="task-done-info">הושלם: ${fmtDateTime(t.completedAt || t.updatedAt)}</div>
+    <div class="task-done-info">
+      <span>✓ הושלם: ${fmtDateTime(t.completedAt || t.updatedAt)}</span>
+      <button class="task-btn btn-advance" style="flex:0 0 auto;padding:8px 14px" onclick="restoreTask('${t.id}')">${ic('undo', 15)} החזר לפעילה</button>
+    </div>
   `;
 
   return `
@@ -656,6 +661,18 @@ function handleStuck(id) {
 
 function handleDone(id) {
   confirmComplete(id);
+}
+
+function restoreTask(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+  t.status = 'new';
+  t.completedAt = null;
+  t.stuckAt = null;
+  t.updatedAt = new Date().toISOString();
+  saveState();
+  toast('↩️ המשימה הוחזרה לפעילה');
+  renderApp();
 }
 
 function confirmDeleteTask(id) {
